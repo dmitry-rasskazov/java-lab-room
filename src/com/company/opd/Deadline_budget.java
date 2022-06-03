@@ -1,3 +1,5 @@
+package com.company.opd;
+
 import java.util.Scanner;
 
 public class Deadline_budget {
