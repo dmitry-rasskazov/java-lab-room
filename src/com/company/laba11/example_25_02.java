@@ -18,7 +18,7 @@ public class example_25_02 {
     }
 
     public static void main(String[] args) throws IOException {
-        InputStream inFile = new FileInputStream("D:/tmp/test.txt");
+        InputStream inFile = new FileInputStream("D:/tmp/input10.txt");
         readAllByByte(inFile);
         System.out.println("\n\n");
         inFile.close();
