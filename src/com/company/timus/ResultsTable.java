@@ -3,23 +3,26 @@ package com.company.timus;
 import java.io.*;
 
 public class ResultsTable {
-    private static BufferedReader br = new BufferedReader(new InputStreamReader(System.in), 8192);
+    private static BufferedReader br = new BufferedReader(new InputStreamReader(System.in), 1024);
 
     public static void main(String[] args) throws IOException {
+        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out), 1024);
+
         int N = nextInt();
         int[][] results = new int[N][2];
-        int[][] buff = new int[N][2];
 
         for (int i = 0; i < N; i++) {
             results[i][0] = nextInt();
             results[i][1] = nextInt();
         }
 
-        results = mergeSort(results, buff, 0, 0);
+        mergeUSort(results);
 
         for (int i = 0; i < N; i++) {
-            System.out.printf("%d %d\n", results[i][0], results[i][1]);
+            bw.write(String.format("%d %d", results[i][0], results[i][1]));
+            bw.newLine();
         }
+        bw.flush();
     }
 
     private static int nextInt() throws IOException {
@@ -38,46 +41,54 @@ public class ResultsTable {
         return result;
     }
 
-    private static int[][] mergeSort(int[][] up, int[][] down, int left, int right)
+    private static void mergeUSort(int[][] source)
     {
-        if(left == right) {
-            down[left] = up[left];
-            return down;
+        mergeUSort(source, new int[source.length][2], 0, source.length-1);
+    }
+
+    private static void mergeUSort(int[][] source, int[][] buff, int left, int right)
+    {
+        if(left >= right) {
+            overrideValue(source, left, buff, left);
+            return;
         }
 
-        int middle = left + (right - left) / 2;
-        int[][] l_buff = mergeSort(up, down, left, middle);
-        int[][] r_buff = mergeSort(up, down, middle + 1, right);
+        int median = (right + left) / 2;
+        mergeUSort(source, buff, left, median);
+        mergeUSort(source, buff, median+1, right);
 
-        int[][] target = l_buff == up ? down : up;
-        int l_cur = left, r_cur = middle + 1;
+        for(int i = left, j = median+1, u = left;;)
+        {
+            if(i <= median && j <= right) {
+                if(source[i][1] >= source[j][1]) {
+                    overrideValue(source, i, buff, u);
+                    i++;
+                } else {
+                    overrideValue(source, j, buff, u);
+                    j++;
+                }
+            } else if(i <= median) {
+                overrideValue(source, i, buff, u);
+                i++;
+            } else if(j <= right) {
+                overrideValue(source, j, buff, u);
+                j++;
+            } else {
+                break;
+            }
+
+            u++;
+        }
+
         for(int i = left; i <= right; i++) {
-            if (l_cur <= middle && r_cur <= right)
-            {
-                if (l_buff[l_cur][1] < r_buff[r_cur][1])
-                {
-                    target[i] = l_buff[l_cur];
-                    l_cur++;
-                }
-                else
-                {
-                    target[i] = r_buff[r_cur];
-                    r_cur++;
-                }
-            }
-            else if (l_cur <= middle)
-            {
-                target[i] = l_buff[l_cur];
-                l_cur++;
-            }
-            else
-            {
-                target[i] = r_buff[r_cur];
-                r_cur++;
-            }
+            overrideValue(buff, i, source, i);
         }
+    }
 
-        return target;
+    private static void overrideValue(int[][] source, int sourceIndex, int[][] target, int targetIndex)
+    {
+        target[targetIndex][0] = source[sourceIndex][0];
+        target[targetIndex][1] = source[sourceIndex][1];
     }
 }
 
