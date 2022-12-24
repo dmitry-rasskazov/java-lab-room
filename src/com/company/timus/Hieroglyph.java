@@ -4,9 +4,9 @@ import java.io.*;
 
 public class Hieroglyph
 {
-    private static InputStream console = new BufferedInputStream(System.in, 1024);
+    private static InputStream console = new BufferedInputStream(System.in, 2048);
 
-    private static OutputStream printer = new BufferedOutputStream(System.out, 512);
+    private static OutputStream printer = new BufferedOutputStream(System.out, 256);
 
     private static final short LENGTH = 'z' - 'a' + 1;
 
