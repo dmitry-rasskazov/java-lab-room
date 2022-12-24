@@ -1,59 +1,35 @@
 package com.company.timus;
 
 import java.io.*;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Set;
 
 public class Hieroglyph
 {
-    private static InputStream console = new BufferedInputStream(System.in, 2048);
+    private static InputStream console = new BufferedInputStream(System.in, 1024);
 
-    private static OutputStream printer = new BufferedOutputStream(System.out, 128);
+    private static OutputStream printer = new BufferedOutputStream(System.out, 512);
 
     private static final short LENGTH = 'z' - 'a' + 1;
 
     public static void main(String[] args) throws IOException {
 
-//        boolean[][] result = new boolean[LENGTH][LENGTH];
-//        for (boolean[] item: result) {
-//            Arrays.fill(item, false);
-//        }
+        int[] result = new int[LENGTH];
 
-        Set<Byte>[] result = new Set[LENGTH];
-        int n = nextInt();
-        byte buf;
-        for(int i = 0; i < n; i++)
-        {
-            buf = (byte) (nextSymbolByte() - 'a');
-            if(null == result[buf]) {
-                result[buf] = new HashSet<>();
+        short n = (short) nextInt();
+        byte index;
+
+        for (short i = 0; i < n; i++) {
+            result[nextSymbolByte() - 'a'] |= (1 << (nextSymbolByte() - 'a'));
+        }
+
+        index = (byte) (nextSymbolByte() - 'a');
+        for (short i = 0; i <= 25; i++) {
+            if ((result[index] & (1 << i)) != 0) {
+                printer.write(index + 'a');
+                printer.write(i + 'a');
+                printer.write('\n');
             }
-            result[buf].add((byte)(nextSymbolByte() & 0xff));
         }
-//        short index;
-//
-//        for (int i = 0; i < n; i++) {
-//            index = (short) (console.read() - 'a');
-//            result[index][console.read() - 'a'] = true;
-//            console.skip(2);
-//        }
-//
-//        short last = (short) console.read(), lastIndex = (short) (last - 'a');
-//        for (short i = 0; i < result[lastIndex].length; i++) {
-//            if (result[lastIndex][i]) {
-//                printer.write(last);
-//                printer.write(i + 'a');
-//                printer.write('\n');
-//            }
-//        }
-        buf = nextSymbolByte();
-        for (Byte item: null == result[buf - 'a'] ? new LinkedList<Byte>() : result[buf - 'a']) {
-            printer.write(buf);
-            printer.write(item);
-            printer.write('\n');
-        }
+
         printer.write('\n');
         printer.flush();
 
@@ -90,3 +66,32 @@ public class Hieroglyph
         }
     }
 }
+
+/**
+ * 1545. Иероглифы
+ * Ограничение времени: 1.0 секунды
+ * Ограничение памяти: 64 МБ
+ * Вове очень нравится аниме. Он настолько увлекся этим творчеством, что даже научился сносно общаться со своими японскими друзьями на их родном языке. Но вот при электронной переписке Вове до сих пор приходится пользоваться латиницей. Он хочет сразу печатать иероглифы со своей клавиатуры. Сергей, его товарищ по команде, написал маленькое приложение, позволяющее писать иероглифы, набирая при этом на клавиатуре латинские символы. Для этого, так как иероглифов значительно больше, чем букв латинского алфавита, Сергей создал специальный справочник, в котором каждый иероглиф представляется в виде последовательности из двух строчных букв латинского алфавита. Как только программка осознаёт, что набрана последовательность латинских букв, соответствующая некоторому иероглифу, то эта последовательность заменяется соответствующим иероглифом.
+ * Когда Вова стал работать с программкой Сергея, ему быстро надоело заглядывать в справочник соответствия комбинаций букв и иероглифов за подсказкой. Помогите Сергею доработать свою программку, чтобы при вводе некоторой латинской буквы на экране автоматически отображалась подсказка, помогающая продолжить ее до корректного иероглифа.
+ * Исходные данные
+ * В первой строке находится количество иероглифов в справочнике Сергея N (1 ≤ N ≤ 1000). В следующих N строках содержатся последовательности латинских символов из справочника, соответствующие японским иероглифам, по одной последовательности в строке. Каждая такая последовательность состоит из двух строчных букв латинского алфавита. В следующей строке содержится введенная Вовой буква.
+ * Результат
+ * Выведите список иероглифов из справочника, которые начинаются на введенный Вовой символ, по одному в строке в любом порядке. Если таких иероглифов нет, то ничего выводить не надо.
+ * Пример
+ * исходные данные	результат
+ *
+ * 6
+ * na
+ * no
+ * ni
+ * ki
+ * ka
+ * ku
+ * k
+ *
+ *
+ *
+ * ka
+ * ki
+ * ku
+ */
