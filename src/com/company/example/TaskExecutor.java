@@ -1,21 +1,18 @@
 package com.company.example;
 
-import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class TaskExecutor
 {
-    private static Example example;
-    private static Example example2;
-
     public static void main(String[] args)
     {
         System.out.println("Begin of the Main!");
 
-        example = new Example();
-        example2 = new Example();
+        Example example = new Example();
         example.run();
         example = null;
+
         System.gc();
 
         System.out.println("End of the Main!");
@@ -23,10 +20,12 @@ public class TaskExecutor
 
     private static class Example
     {
-        private final Executor executorService;
+        private final ExecutorService executorService;
+        private final Tasks tasks;
 
         public Example()
         {
+            this.tasks = new Tasks(this);
             this.executorService = Executors.newSingleThreadExecutor(r -> {
                 Thread thread = new Thread(r);
                 thread.setName("TaskExecutor-" + r.getClass());
@@ -37,55 +36,53 @@ public class TaskExecutor
 
         public void run()
         {
-            executorService.execute(() -> {
-                System.out.println("Task1 executed");
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-            });
-
-            executorService.execute(() -> {
-                System.out.println("Task2 executed");
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-            });
-
-            executorService.execute(() -> {
-                System.out.println("Task3 executed");
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-            });
-
-            executorService.execute(() -> {
-                System.out.println("Task4 executed");
-                try {
-                    Thread.sleep(500);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-            });
-
-            executorService.execute(Example::test);
-
-            executorService.execute(TaskExecutor::test);
-        }
-
-        public static void test()
-        {
-            System.out.println("Test1 successful!");
+            this.executorService.execute(this.tasks::test1);
+            this.executorService.execute(this.tasks::test2);
+            this.executorService.execute(this.tasks::test3);
+            this.executorService.shutdown();
         }
     }
 
-    public static void test()
+    public static class Tasks
     {
-        System.out.println("Test2 successful!");
+        private final Example example;
+
+        public Tasks(Example example)
+        {
+            this.example = example;
+        }
+
+        public void test1()
+        {
+            try {
+                System.out.println("Test 1");
+                Thread.sleep(5000);
+            } catch (Exception exception) {
+                System.err.println(exception.getMessage());
+                exception.printStackTrace();
+            }
+        }
+
+        public void test2()
+        {
+            try {
+                System.out.println("Test 2");
+                Thread.sleep(7500);
+            } catch (Exception exception) {
+                System.err.println(exception.getMessage());
+                exception.printStackTrace();
+            }
+        }
+
+        public void test3()
+        {
+            try {
+                System.out.println("Test 3");
+                Thread.sleep(5000);
+            } catch (Exception exception) {
+                System.err.println(exception.getMessage());
+                exception.printStackTrace();
+            }
+        }
     }
 }

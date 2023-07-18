@@ -1,9 +1,6 @@
 package com.company.example;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Scanner;
+import java.util.*;
 
 public class ArrayExample {
     public static void main(String[] args) {
@@ -23,6 +20,10 @@ public class ArrayExample {
         } catch (NumberFormatException exception) {
             System.out.println("Ошибка ввода: попалось незнакомое число. Результат: ");
         }
+
+        Collections.shuffle(list);
+
+        Integer test;
 
         for (Integer num: list) {
             System.out.println(num);
