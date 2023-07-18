@@ -1,2 +1,4 @@
 # ignore all these output files
 out/
+/**/*.override.*
+target/
