@@ -1,5 +1,7 @@
 package com.company.example;
 
+import java.lang.ref.WeakReference;
+import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -11,6 +13,7 @@ public class TaskExecutor
 
         Example example = new Example();
         example.run();
+        WeakReference<Example> weakReference = new WeakReference<>(example);
         example = null;
 
         System.gc();
@@ -39,7 +42,13 @@ public class TaskExecutor
             this.executorService.execute(this.tasks::test1);
             this.executorService.execute(this.tasks::test2);
             this.executorService.execute(this.tasks::test3);
-            this.executorService.shutdown();
+            this.executorService.execute(this::test);
+            System.out.println(Arrays.toString(this.executorService.shutdownNow().toArray()));
+        }
+
+        private void test()
+        {
+            System.out.println("Examples->test method");
         }
     }
 

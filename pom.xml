@@ -30,7 +30,6 @@
                 <enabled>true</enabled>
                 <updatePolicy>always</updatePolicy>
             </snapshots>
-            <layout>default</layout>
         </repository>
 
         <repository>
@@ -52,13 +51,20 @@
         <dependency>
             <groupId>org.mobicents.protocols.sctp</groupId>
             <artifactId>sctp-api</artifactId>
-            <version>2.0.0-992</version>
+            <version>2.0.0-993</version>
         </dependency>
 
         <dependency>
             <groupId>org.mobicents.protocols.sctp</groupId>
             <artifactId>sctp-impl</artifactId>
-            <version>2.0.0-992</version>
+            <version>2.0.0-993</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/com.sun.istack/istack-commons-runtime -->
+        <dependency>
+            <groupId>com.sun.istack</groupId>
+            <artifactId>istack-commons-runtime</artifactId>
+            <version>4.1.0</version>
         </dependency>
     </dependencies>
 

@@ -1,3 +1,5 @@
+package com.company.laba1;
+
 public class example_24_06 {
     static double a =10.0, b=4.0, c;
 

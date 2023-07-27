@@ -1,11 +1,9 @@
 package com.company.laba8;
 
-import com.sun.istack.internal.NotNull;
-
 import java.util.Arrays;
 
 public class LinkedList {
-    private @NotNull LinkedListNode head;
+    private LinkedListNode head;
 
     private LinkedList(LinkedListNode head) {
         this.head = head;

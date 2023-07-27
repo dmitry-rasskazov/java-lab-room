@@ -1,3 +1,5 @@
+package com.company.laba1;
+
 public class example_24_03 {
     public static void main(String[] args) {
         int S, D;
