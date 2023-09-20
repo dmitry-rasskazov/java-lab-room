@@ -1,9 +1,7 @@
 package com.company.laba8;
 
-import com.sun.istack.internal.NotNull;
-
 public class example_25_05_2 {
-    public static LinkedListNode addAtTail(int value, @NotNull LinkedListNode tail) {
+    public static LinkedListNode addAtTail(int value, LinkedListNode tail) {
         return tail.next = new LinkedListNode(value, null);
     }
 

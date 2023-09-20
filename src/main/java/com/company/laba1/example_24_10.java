@@ -1,3 +1,5 @@
+package com.company.laba1;
+
 import java.util.Scanner;
 
 public class example_24_10 {

@@ -1,3 +1,5 @@
+package com.company.laba1;
+
 public class example_24_20 {
     public static double hyp(double a, double b){
         return Math.sqrt(Math.pow(a, 2) + Math.pow(b, 2));
