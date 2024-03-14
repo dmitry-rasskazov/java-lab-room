@@ -1,6 +1,8 @@
 package com.company.example;
 
-import java.lang.reflect.InvocationTargetException;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.lang.reflect.Method;
 import java.util.*;
 
@@ -61,26 +63,27 @@ public class MessageBus
 
         Subsystem(SubsystemUnit subsystemUnit) {
             this.subsystemUnit = subsystemUnit;
+            System.out.println(this.hashCode());
         }
 
         public void method1(SpecificCommand specificCommand)
         {
-            System.out.println("SpecificCommand");
+            System.out.println("SpecificCommand: ");
         }
 
         public void method2(SpecificCommand1 specificCommand1)
         {
-            System.out.println("SpecificCommand1");
+            System.out.println("SpecificCommand1: ");
         }
 
         public void method3(SpecificCommand2 specificCommand2)
         {
-            System.out.println("SpecificCommand2");
+            System.out.println("SpecificCommand2: ");
         }
 
         public void method4(Command3 Command3)
         {
-            System.out.println("Command3");
+            System.out.println("Command3: ");
         }
     }
 
@@ -99,47 +102,45 @@ public class MessageBus
 
     private static class CommandBus
     {
-        private final Map<Class<?>, List<Method>> methodsMap;
-        private final Map<Method, Object> subsystemMap;
+        private final Map<Class<?>, List<MethodInvoker>> methodsMap;
 
         CommandBus() {
             this.methodsMap = new HashMap<>();
-            this.subsystemMap = new HashMap<>();
         }
 
         public <X> void registry(X commandHandler)
         {
-            Method[] methods = commandHandler.getClass().getMethods();
+            MethodHandles.Lookup publicLookup = MethodHandles.publicLookup();
+
+            Class<?> commandHandlerClass = commandHandler.getClass();
+            Method[] methods = commandHandlerClass.getMethods();
             for(Method method: methods) {
                 Class<?>[] argumentTypes = method.getParameterTypes();
                 if(argumentTypes.length == 1 && !argumentTypes[0].isPrimitive() && method.getReturnType().equals(void.class))
                 {
-                    List<Method> methodList = this.methodsMap.computeIfAbsent(argumentTypes[0], k -> new LinkedList<>());
-                    methodList.add(method);
-                    this.subsystemMap.put(method, commandHandler);
+                    try {
+                        Class<?> parameterType = argumentTypes[0];
+                        MethodType methodType = MethodType.methodType(void.class, parameterType);
+                        MethodHandle methodHandle = publicLookup.findVirtual(commandHandlerClass, method.getName(), methodType);
+
+                        List<MethodInvoker> methodList = this.methodsMap.computeIfAbsent(parameterType, k -> new LinkedList<>());
+                        methodList.add(new MethodInvoker(commandHandler, methodHandle));
+                    } catch (NoSuchMethodException | IllegalAccessException exception) {
+                        throw new RuntimeException(exception);
+                    }
                 }
             }
         }
 
         public <X> void dispatch(X command)
         {
-            List<Method> commandHandlers = this.getCommandHandlers(command);
-            try {
-                commandHandlers.forEach((handler) -> {
-                    try {
-                        handler.invoke(this.subsystemMap.get(handler), command);
-                    } catch (IllegalAccessException | InvocationTargetException e) {
-                        throw new RuntimeException(e);
-                    }
-                });
-            } catch (Throwable e) {
-                throw new RuntimeException(e);
-            }
+            List<MethodInvoker> commandHandlers = this.getCommandHandlers(command);
+            commandHandlers.forEach((invoker) -> invoker.handle(command));
         }
 
-        private <X> List<Method> getCommandHandlers(X command)
+        private <X> List<MethodInvoker> getCommandHandlers(X command)
         {
-            List<Method> result = new LinkedList<>();
+            List<MethodInvoker> result = new LinkedList<>();
             Class<?> commandClass = command.getClass();
 
             while(null != commandClass) {
@@ -148,6 +149,33 @@ public class MessageBus
             }
 
             return result;
+        }
+    }
+
+    private static class MethodInvoker
+    {
+        private final Object context;
+
+        private final MethodHandle methodHandle;
+
+        MethodInvoker(Object context, MethodHandle methodHandle) {
+            this.context = context;
+            this.methodHandle = methodHandle;
+        }
+
+        public <X> void handle(X command)
+        {
+            try {
+                this.methodHandle.invokeWithArguments(this.context, command);
+            } catch (Throwable e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        @Override
+        public int hashCode()
+        {
+            return Objects.hash(super.hashCode(), this.context, this.methodHandle);
         }
     }
 }
