@@ -4,29 +4,21 @@ import java.util.*;
 
 public class ArrayExample {
     public static void main(String[] args) {
-        Scanner console = new Scanner(System.in);
-
-        List<Integer> list = new ArrayList<Integer>();
-
-        System.out.print("Введите с клавиатуры число: ");
-        String word;
-
-        try {
-            while (!(word = console.nextLine()).equals("")) {
-                list.add(Integer.parseInt(word));
-            }
-        } catch (NoSuchElementException exception) {
-            System.out.println("Ввод закончен. Результат: ");
-        } catch (NumberFormatException exception) {
-            System.out.println("Ошибка ввода: попалось незнакомое число. Результат: ");
+        var list = new ArrayList<Integer>();
+        for(int i = 0; i < 50000; i++) {
+            list.add(i);
         }
 
-        Collections.shuffle(list);
+        var stringBuf = new StringBuffer();
 
-        Integer test;
+        list.forEach(_ -> stringBuf.append("%d"));
 
-        for (Integer num: list) {
-            System.out.println(num);
-        }
+        var string = stringBuf.toString();
+
+        var start = System.currentTimeMillis();
+        var _ = String.format(string, list);
+        var finish = System.currentTimeMillis();
+
+        System.out.println(start - finish);
     }
 }
