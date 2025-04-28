@@ -1,73 +1,135 @@
 package com.company.timus;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
-public class MobileTelegraph {
-    private static BufferedReader console;
-    private static int[] times;
-    private static Node head;
-    private static Map<String, Node> cache;
+public class MobileTelegraph
+{
+    private static BufferedReader reader;
 
-    public static void main(String[] args) throws IOException {
+    private static BufferedWriter writer;
+
+    private static int[] times;
+
+    private static Node firstNumber;
+
+    private static Node lastNumber;
+
+    public static void main(String[] args) throws IOException
+    {
         initEn();
 
-        int N = nextNumber();
-
-        cache = new HashMap<>(N);
+        int n = Integer.parseInt(new String(nextNumber(), StandardCharsets.UTF_8));
+        Map<ByteArrayKey, Node> map = new HashMap<>(n);
 
         times = nextNumberList();
 
-        head = new Node(console.readLine(), 1, false);
-        cache.put(head.telNumber(), head);
+        byte[] number = nextNumber();
 
-        Node nextNode;
-        N--;
-        for (int i = 2; i <= N; i++) {
-            nextNode = new Node(console.readLine(), i, false);
+        Node node = new Node(1, number);
+        node.setTime(0);
 
-//            fillNeighbours(nextNode);
+        firstNumber = node;
+        map.put(new ByteArrayKey(number), node);
+
+        for(int i = 2; i <= n; i++) {
+            number = nextNumber();
+            node = new Node(i, number);
+            insertToMap(node, map);
         }
 
-        nextNode = new Node(console.readLine(), ++N, true);
-//        fillNeighbours(nextNode);
+        lastNumber = node;
 
-        cache = new HashMap<>(N);
-        Stack<Node> stack = new Stack<>();
-        stack.push(head);
+        if(search()) {
+            writer.write(Integer.toString(lastNumber.getTime()));
+            writer.newLine();
+            node = lastNumber;
+            Stack<Node> steps = new Stack<>();
+            steps.add(node);
 
-        while (!stack.empty()) {
-            nextNode = stack.pop();
-            if(!nextNode.isTarget()) {
-                for (Node item: nextNode.neighbours()) {
-                    stack.push(item);
-                }
+            while((node = node.getParent()) != null) {
+                steps.add(node);
             }
+
+            writer.write(Integer.toString(steps.size()));
+            writer.newLine();
+            writer.write(Integer.toString(steps.pop().getId()));
+            while(!steps.empty()) {
+                writer.write(" ");
+                writer.write(Integer.toString(steps.pop().getId()));
+            }
+
+            writer.newLine();
+            writer.flush();
+        } else {
+            System.out.println("-1");
         }
     }
 
-    private static String[] getNumbers(int length) throws IOException {
-        String[] telNumbers = new String[length];
+    private static boolean search()
+    {
+        Queue<Node> queue = new PriorityQueue<>();
 
-        for (int i = 0; i < telNumbers.length; i++) {
-            telNumbers[i] = console.readLine();
+        Node node;
+        int timeIndex;
+        int time, oldTime;
+
+        if(lastNumber.getNeighbours().isEmpty()) {
+            return false;
         }
 
-        return telNumbers;
+        queue.add(firstNumber);
+
+        while (!queue.isEmpty()) {
+            node = queue.poll();
+
+            if(lastNumber.getTime() < node.getTime()) {
+                continue;
+            }
+
+            for(Node neighbour: node.getNeighbours()) {
+                if(!neighbour.isVisited()) {
+                    timeIndex = getCommonHeaderLength(node.getNumber(), neighbour.getNumber());
+
+                    time = times[timeIndex] + node.getTime();
+
+                    oldTime = neighbour.getTime();
+                    if(time < oldTime) {
+                        neighbour.setTime(time);
+                        neighbour.setParent(node);
+
+                        if(lastNumber.equals(neighbour)) {
+                            lastNumber.getNeighbours().remove(node);
+                            if(lastNumber.getNeighbours().isEmpty()) {
+                                return true;
+                            }
+
+                            continue;
+                        }
+
+                        queue.add(neighbour);
+                    }
+                }
+            }
+
+            node.setVisited(true);
+        }
+
+        return lastNumber.getParent() != null;
     }
 
     private static void initEn() {
-        console = new BufferedReader(new InputStreamReader(System.in));
+        reader = new BufferedReader(new InputStreamReader(System.in));
+        writer = new BufferedWriter(new OutputStreamWriter(System.out));
     }
 
-    private static int nextNumber() throws IOException {
-        return Integer.parseInt(console.readLine());
+    private static byte[] nextNumber() throws IOException {
+        return reader.readLine().getBytes();
     }
 
     private static int[] nextNumberList() throws IOException {
-        String[] splitNumbers = console.readLine().split(" ");
+        String[] splitNumbers = reader.readLine().split(" ");
         int[] result = new int[splitNumbers.length];
 
         for (int i = 0; i < splitNumbers.length; i++) {
@@ -77,92 +139,172 @@ public class MobileTelegraph {
         return result;
     }
 
-    private static boolean isSimilar(String first, String second) 
+    private static int getCommonHeaderLength(byte[] first, byte[] second)
     {
-        char[] exchange = new char[2];
-        short diffCounter = 0;
-
-        for(int i = 0; i < first.length(); i++)
+        for(int i = 0; i < first.length; i++)
         {
-            if(first.charAt(i) != second.charAt(i)) {
-                if(diffCounter == 0) {
-                    ++diffCounter;
-                    exchange[0] = first.charAt(i);
-                    exchange[1] = second.charAt(i);
-                } else if (diffCounter == 1 && (exchange[0] != second.charAt(i) || exchange[1] != first.charAt(i))) {
-                    return false;
-                } else {
-                    ++diffCounter;
-                }
-            }
-        }
-
-        return diffCounter <= 2;
-    }
-
-    private static int getTime(String first, String second) {
-        return times[getPrefixLength(first, second)];
-    }
-
-    private static int getPrefixLength(String first, String second) {
-        if(first.length() != second.length()) {
-            return 0;
-        }
-
-        char[] firstArray = first.toCharArray();
-        char[] secondArray = second.toCharArray();
-
-        for(int i = 0; i < firstArray.length; i++) {
-            if(firstArray[i] != secondArray[i]) {
+            if(first[i] != second[i]) {
                 return i;
             }
         }
 
-        return firstArray.length-1;
-    }
-}
-
-class Node {
-    private final String telNumber;
-    private final int orderNumber;
-    private final List<Node> neighbours;
-    private final boolean isTarget;
-
-    public Node(String telNumber, int orderNumber, boolean isTarget)
-    {
-        this.telNumber = telNumber;
-        this.orderNumber = orderNumber;
-        this.neighbours = new ArrayList<>();
-        this.isTarget = isTarget;
+        return -1;
     }
 
-    public List<Node> neighbours()
+    private static void insertToMap(Node node, Map<ByteArrayKey, Node> map)
     {
-        return this.neighbours;
+        byte[] source = node.getNumber();
+        Node neighbour;
+        byte[] neighbourNumber;
+
+        for(int i = 0; i < source.length; i++)
+        {
+            for(int j = 0; j < 10; j++)
+            {
+                if(source[i] == j + '0') {
+                    continue;
+                }
+
+                neighbourNumber = new byte[source.length];
+                System.arraycopy(source, 0, neighbourNumber, 0, source.length);
+                neighbourNumber[i] = (byte) (j + '0');
+
+                if((neighbour = map.get(new ByteArrayKey(neighbourNumber))) != null) {
+                    node.addNeighbour(neighbour);
+                    neighbour.addNeighbour(node);
+                }
+            }
+
+            for(int j = i+1; j < source.length; j++)
+            {
+                if(source[j] == source[i]) {
+                    continue;
+                }
+
+                neighbourNumber = new byte[source.length];
+                System.arraycopy(source, 0, neighbourNumber, 0, source.length);
+                byte temp = neighbourNumber[i];
+                neighbourNumber[i] = neighbourNumber[j];
+                neighbourNumber[j] = temp;
+
+                if((neighbour = map.get(new ByteArrayKey(neighbourNumber))) != null) {
+                    node.addNeighbour(neighbour);
+                    neighbour.addNeighbour(node);
+                }
+            }
+        }
+
+        ByteArrayKey key = new ByteArrayKey(node.getNumber());
+        map.put(key, node);
     }
 
-    public String telNumber()
+    private static class Node implements Comparable<Node>
     {
-        return this.telNumber;
+        private final int id;
+        private final byte[] number;
+        private final List<Node> neighbours;
+        private int time;
+        private boolean visited;
+        private Node parent;
+
+        Node(int id, byte[] number)
+        {
+            this.id = id;
+            this.number = number;
+            this.neighbours = new LinkedList<>();
+            this.time = Integer.MAX_VALUE;
+        }
+
+        public int getId() {
+            return this.id;
+        }
+
+        public byte[] getNumber() {
+            return this.number;
+        }
+
+        public List<Node> getNeighbours() {
+            return this.neighbours;
+        }
+
+        public void addNeighbour(Node node)
+        {
+            this.neighbours.add(node);
+        }
+
+        public void setTime(int time)
+        {
+            this.time = time;
+        }
+
+        public int getTime()
+        {
+            return this.time;
+        }
+
+        public boolean isVisited()
+        {
+            return this.visited;
+        }
+
+        public void setVisited(boolean visited)
+        {
+            this.visited = visited;
+        }
+
+        public void setParent(Node parent)
+        {
+            this.parent = parent;
+        }
+
+        public Node getParent()
+        {
+            return this.parent;
+        }
+
+        @Override
+        public boolean equals(Object obj)
+        {
+            if (this == obj) return true;
+            if (obj == null || Node.class != obj.getClass()) return false;
+            Node node = (Node) obj;
+            return id == node.id;
+        }
+
+        @Override
+        public int compareTo(Node o)
+        {
+            return Integer.compare(this.time, o.getTime());
+        }
     }
 
-    public int orderNumber()
+    private static class ByteArrayKey
     {
-        return this.orderNumber;
-    }
+        private final int hash;
 
-    public boolean isTarget()
-    {
-        return this.isTarget;
-    }
+        private final byte[] array;
 
-    public boolean equals(Node node)
-    {
-        return this.telNumber().equals(node.telNumber());
-    }
+        public ByteArrayKey(byte[] array)
+        {
+            this.hash = Arrays.hashCode(array);
+            this.array = array;
+        }
 
-    public int hashCode()
-    {
-        return this.telNumber().hashCode();
+        public byte[] getArray()
+        {
+            return this.array;
+        }
+
+        @Override
+        public int hashCode()
+        {
+            return this.hash;
+        }
+
+        @Override
+        public boolean equals(Object o)
+        {
+            return o instanceof ByteArrayKey && Arrays.equals(((ByteArrayKey) o).getArray(), this.array);
+        }
     }
 }
