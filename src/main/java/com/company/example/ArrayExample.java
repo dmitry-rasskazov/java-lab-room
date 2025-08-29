@@ -2,6 +2,7 @@ package com.company.example;
 
 import java.text.ParseException;
 import java.util.*;
+import java.util.stream.Stream;
 
 public class ArrayExample
 {
@@ -56,6 +57,8 @@ public class ArrayExample
         System.out.println(Integer.valueOf(0).hashCode());
         System.out.println(Integer.valueOf(1).hashCode());
         System.out.println(Integer.valueOf(0xfff).hashCode());
+
+        Stream.generate(() -> null).forEach(System.out::println);
     }
 
     interface A
