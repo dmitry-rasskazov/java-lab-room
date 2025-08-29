@@ -86,17 +86,47 @@
             <version>0.9.11</version>
         </dependency>
 
-        <dependency>
-            <groupId>com.bringo</groupId>
-            <artifactId>messageBus</artifactId>
-            <version>1.0.0</version>
-        </dependency>
-
         <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
             <version>3.14.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jcuda</groupId>
+            <artifactId>jcuda</artifactId>
+            <version>11.6.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jcuda</groupId>
+            <artifactId>jcublas</artifactId>
+            <version>11.6.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jcuda</groupId>
+            <artifactId>jcufft</artifactId>
+            <version>11.6.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jcuda</groupId>
+            <artifactId>jcusparse</artifactId>
+            <version>11.6.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jcuda</groupId>
+            <artifactId>jcusolver</artifactId>
+            <version>11.6.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jcuda</groupId>
+            <artifactId>jcurand</artifactId>
+            <version>11.6.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jcuda</groupId>
+            <artifactId>jcudnn</artifactId>
+            <version>11.6.1</version>
         </dependency>
     </dependencies>
 
