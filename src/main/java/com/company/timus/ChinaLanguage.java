@@ -1,6 +1,8 @@
 package com.company.timus;
 
-import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StreamTokenizer;
 
 /**
  * 1964. Китайский язык
@@ -31,7 +33,8 @@ import java.io.BufferedReader;
  */
 public class ChinaLanguage
 {
-    private static final BufferedReader reader = new BufferedReader(new java.io.InputStreamReader(System.in));
+    private static final StreamTokenizer tokenizer = new StreamTokenizer(new java.io.BufferedReader(new java.io.InputStreamReader(System.in)));
+    private static final PrintWriter writer = new PrintWriter(System.out);
 
     public static void main(String[] args) {
         int n = nextInt(), k = nextInt();
@@ -40,36 +43,24 @@ public class ChinaLanguage
         while(--k > 0) {
             a = nextInt() + a;
             if(a <= n) {
-                System.out.println(0);
+                writer.println(0);
+                writer.flush();
                 return;
             } else {
                 a -= n;
             }
         }
 
-        System.out.println(a);
+        writer.println(a);
+        writer.flush();
     }
 
     private static int nextInt() {
         try {
-            int c;
-            do {
-                c = reader.read();
-            } while(c != -1 && (c < '0' || c > '9'));
-
-            if(c == -1) {
-                return -1;
-            }
-
-            int result = 0;
-            do {
-                result = result * 10 + (c - '0');
-                c = reader.read();
-            } while(c != -1 && c >= '0' && c <= '9');
-
-            return result;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+            tokenizer.nextToken();
+            return (int) tokenizer.nval;
+        } catch (IOException ignored) {
+            return -1;
         }
     }
 }
